@@ -1,4 +1,4 @@
-This Project is made using Django. 
+This Project Generates and Stores the CSV File Stats in the Database taking the csv file url as an input.  
 
 It exposes the APIs for
 1. Generating and Storing the CSV File Stats in the Database taking the csv file url as an input. 
