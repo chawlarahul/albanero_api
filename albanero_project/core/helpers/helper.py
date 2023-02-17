@@ -31,7 +31,7 @@ class FileStatsHelper:
             num_rows = df.count() 
             num_cols = len(df.columns) 
 
-            # Get "Column wise Distinct value count " and "Column wise Distinct value count"
+            # Get "Column wise Distinct value count " and "Column wise Null value count"
             columns = df.columns
             
             distinct_counts = [df.agg(countDistinct(column)).collect()[0][0] for column in columns]
