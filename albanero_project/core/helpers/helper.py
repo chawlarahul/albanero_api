@@ -1,6 +1,7 @@
 import json
 import logging
 from django.conf import settings
+from django.http import JsonResponse
 
 import pandas as pd
 import io
@@ -13,16 +14,12 @@ from core.models import FileStats
 logger = logging.getLogger(__name__)
 
 
-
-
 class FileStatsHelper:
     def __init__(self):
-        pass
+        self.spark = SparkSession.builder.appName("FileStats").getOrCreate()
 
     def process_file_stats(self,file_url, file):
         try:
-            # Read file using Spark
-            self.spark = SparkSession.builder.appName("FileStats").getOrCreate()
             spark = self.spark
 
             data = io.StringIO(file.text)
@@ -30,9 +27,11 @@ class FileStatsHelper:
             df = spark.createDataFrame(pd_df)
             
             # Generate file stats using PySpark
-            num_rows = df.count()
-            num_cols = len(df.columns)
-            
+            # Get "number of rows" and "number of columns"
+            num_rows = df.count() 
+            num_cols = len(df.columns) 
+
+            # Get "Column wise Distinct value count " and "Column wise Distinct value count"
             columns = df.columns
             
             distinct_counts = [df.agg(countDistinct(column)).collect()[0][0] for column in columns]
@@ -47,7 +46,13 @@ class FileStatsHelper:
 
 
             # Store file stats in the database
-            FileStats.objects.get_or_create(url=file_url, num_rows=num_rows, num_cols=num_cols, column_wise_distinct_values= distinct_count_output, column_wise_null_values= null_count_output)
+            FileStats.objects.get_or_create(
+                url=file_url, 
+                num_rows=num_rows, 
+                num_cols=num_cols, 
+                column_wise_distinct_values= distinct_count_output, 
+                column_wise_null_values= null_count_output
+            )
             
             # Return file stats as JSON response
             response = {
@@ -60,21 +65,3 @@ class FileStatsHelper:
             raise e
         return response
     
-
-    def get_file_stats(self, file_url):
-        try:
-            result = FileStats.objects.filter(url= file_url).last()
-            if result:
-                response = {
-                        'Number of Rows': result.num_rows,
-                        'Number of Columns': result.num_cols,
-                        'Column wise Distinct value count': result.column_wise_distinct_values, 
-                        'Column wise Null value count': result.column_wise_null_values
-                    }
-            else:
-                return "File URL doesn't exist in Database"
-        except Exception as e:
-            raise e
-        
-        return response
-        
