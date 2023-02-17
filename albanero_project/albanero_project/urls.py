@@ -28,5 +28,6 @@ from core import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('albanero/file_stats/', views.file_stats, name='file_stats'),
+    path('albanero/generate_file_stats/', views.generate_file_stats, name='generate_file_stats'),
+    path('albanero/fetch_file_stats/',views.fetch_file_stats, name= 'fetch_file_stats')
 ]

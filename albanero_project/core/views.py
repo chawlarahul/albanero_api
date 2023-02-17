@@ -11,7 +11,7 @@ from django.http import JsonResponse
 
 # Create your views here.
 @api_view(['POST'])
-def file_stats(request):
+def generate_file_stats(request):
     try:
         file_url = request.query_params.get('url')
         file = requests.get(file_url)
@@ -26,3 +26,12 @@ def file_stats(request):
     # except Exception as e:
     #     return Response(f"Received error in views.file_stats {e}")
         
+@api_view(['GET'])
+def fetch_file_stats(request):
+    try:
+        file_url = request.query_params.get('url')
+        get_stats = FileStatsHelper().get_file_stats(file_url)
+        return Response(get_stats)
+    except Exception as e: 
+        # logger.error(str(e))
+        return Exception("Invalid url")

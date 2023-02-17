@@ -17,12 +17,12 @@ logger = logging.getLogger(__name__)
 
 class FileStatsHelper:
     def __init__(self):
-        self.fields = None
-        self.spark = SparkSession.builder.appName("FileStats").getOrCreate()
+        pass
 
     def process_file_stats(self,file_url, file):
         try:
             # Read file using Spark
+            self.spark = SparkSession.builder.appName("FileStats").getOrCreate()
             spark = self.spark
 
             data = io.StringIO(file.text)
@@ -58,5 +58,23 @@ class FileStatsHelper:
             }
         except Exception as e:
             raise e
+        return response
+    
+
+    def get_file_stats(self, file_url):
+        try:
+            result = FileStats.objects.filter(url= file_url).last()
+            if result:
+                response = {
+                        'Number of Rows': result.num_rows,
+                        'Number of Columns': result.num_cols,
+                        'Column wise Distinct value count': result.column_wise_distinct_values, 
+                        'Column wise Null value count': result.column_wise_null_values
+                    }
+            else:
+                return "File URL doesn't exist in Database"
+        except Exception as e:
+            raise e
         
         return response
+        
